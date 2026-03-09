@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>国旗知识问答</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      color: #1a1a2e;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    .progress {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .flag-display {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .flag-img {
+      width: 200px;
+      height: 133px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border: 3px solid #eee;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .option-btn {
+      padding: 15px 20px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #333;
+    }
+    .option-btn:hover {
+      border-color: #4a90e2;
+      background: #f0f7ff;
+      transform: translateY(-2px);
+    }
+    .option-btn.correct {
+      border-color: #4caf50;
+      background: #e8f5e9;
+    }
+    .option-btn.wrong {
+      border-color: #f44336;
+      background: #ffebee;
+    }
+    .option-btn:disabled {
+      cursor: not-allowed;
+      transform: none;
+    }
+    .result {
+      text-align: center;
+      padding: 30px;
+    }
+    .result h2 {
+      font-size: 32px;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+    }
+    .result .score {
+      font-size: 64px;
+      font-weight: bold;
+      color: #4a90e2;
+      margin: 20px 0;
+    }
+    .result .message {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .restart-btn {
+      padding: 15px 40px;
+      font-size: 18px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .restart-btn:hover {
+      background: #357abd;
+      transform: translateY(-2px);
+    }
+    .country-name {
+      font-size: 18px;
+      text-align: center;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="game">
+    <h1>🌍 国旗知识问答</h1>
+    <div class="progress">第 <span id="current">1</span> / 10 题</div>
+    <div class="flag-display">
+      <img id="flag" class="flag-img" src="" alt="国旗">
+    </div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <script>
+    const countries = [
+      { name: '中国', flag: 'https://flagcdn.com/w320/cn.png' },
+      { name: '美国', flag: 'https://flagcdn.com/w320/us.png' },
+      { name: '英国', flag: 'https://flagcdn.com/w320/gb.png' },
+      { name: '法国', flag: 'https://flagcdn.com/w320/fr.png' },
+      { name: '日本', flag: 'https://flagcdn.com/w320/jp.png' },
+      { name: '德国', flag: 'https://flagcdn.com/w320/de.png' },
+      { name: '加拿大', flag: 'https://flagcdn.com/w320/ca.png' },
+      { name: '澳大利亚', flag: 'https://flagcdn.com/w320/au.png' },
+      { name: '韩国', flag: 'https://flagcdn.com/w320/kr.png' },
+      { name: '意大利', flag: 'https://flagcdn.com/w320/it.png' },
+      { name: '巴西', flag: 'https://flagcdn.com/w320/br.png' },
+      { name: '印度', flag: 'https://flagcdn.com/w320/in.png' },
+      { name: '俄罗斯', flag: 'https://flagcdn.com/w320/ru.png' },
+      { name: '西班牙', flag: 'https://flagcdn.com/w320/es.png' },
+      { name: '墨西哥', flag: 'https://flagcdn.com/w320/mx.png' },
+      { name: '印度尼西亚', flag: 'https://flagcdn.com/w320/id.png' },
+      { name: '沙特阿拉伯', flag: 'https://flagcdn.com/w320/sa.png' },
+      { name: '南非', flag: 'https://flagcdn.com/w320/za.png' },
+      { name: '土耳其', flag: 'https://flagcdn.com/w320/tr.png' },
+      { name: '瑞士', flag: 'https://flagcdn.com/w320/ch.png' },
+      { name: '瑞典', flag: 'https://flagcdn.com/w320/se.png' },
+      { name: '荷兰', flag: 'https://flagcdn.com/w320/nl.png' },
+      { name: '波兰', flag: 'https://flagcdn.com/w320/pl.png' },
+      { name: '比利时', flag: 'https://flagcdn.com/w320/be.png' },
+      { name: '泰国', flag: 'https://flagcdn.com/w320/th.png' },
+      { name: '越南', flag: 'https://flagcdn.com/w320/vn.png' },
+      { name: '阿根廷', flag: 'https://flagcdn.com/w320/ar.png' },
+      { name: '埃及', flag: 'https://flagcdn.com/w320/eg.png' },
+      { name: '新西兰', flag: 'https://flagcdn.com/w320/nz.png' },
+      { name: '新加坡', flag: 'https://flagcdn.com/w320/sg.png' },
+      { name: '马来西亚', flag: 'https://flagcdn.com/w320/my.png' },
+      { name: '菲律宾', flag: 'https://flagcdn.com/w320/ph.png' },
+      { name: '巴基斯坦', flag: 'https://flagcdn.com/w320/pk.png' },
+      { name: '尼日利亚', flag: 'https://flagcdn.com/w320/ng.png' },
+      { name: '哥伦比亚', flag: 'https://flagcdn.com/w320/co.png' },
+      { name: '智利', flag: 'https://flagcdn.com/w320/cl.png' },
+      { name: '芬兰', flag: 'https://flagcdn.com/w320/fi.png' },
+      { name: '挪威', flag: 'https://flagcdn.com/w320/no.png' },
+      { name: '丹麦', flag: 'https://flagcdn.com/w320/dk.png' },
+      { name: '奥地利', flag: 'https://flagcdn.com/w320/at.png' },
+      { name: '爱尔兰', flag: 'https://flagcdn.com/w320/ie.png' },
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function generateQuestions() {
+      const shuffled = shuffle(countries);
+      questions = shuffled.slice(0, 10).map(correct => {
+        const others = shuffle(countries.filter(c => c.name !== correct.name)).slice(0, 3);
+        const options = shuffle([correct, ...others]);
+        return { correct, options };
+      });
+    }
+
+    function renderQuestion() {
+      const q = questions[currentIndex];
+      document.getElementById('current').textContent = currentIndex + 1;
+      document.getElementById('flag').src = q.correct.flag;
+      
+      const optionsEl = document.getElementById('options');
+      optionsEl.innerHTML = '';
+      
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.name;
+        btn.onclick = () => handleAnswer(opt);
+        optionsEl.appendChild(btn);
+      });
+      
+      answered = false;
+    }
+
+    function handleAnswer(selected) {
+      if (answered) return;
+      answered = true;
+      
+      const q = questions[currentIndex];
+      const btns = document.querySelectorAll('.option-btn');
+      
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === q.correct.name) {
+          btn.classList.add('correct');
+        } else if (btn.textContent === selected.name && selected.name !== q.correct.name) {
+          btn.classList.add('wrong');
+        }
+      });
+      
+      if (selected.name === q.correct.name) {
+        score++;
+      }
+      
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < 10) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      }, 1200);
+    }
+
+    function showResult() {
+      const container = document.getElementById('game');
+      let message = '';
+      if (score === 10) {
+        message = '太厉害了！全部答对！🎉';
+      } else if (score >= 7) {
+        message = '很不错！继续加油！💪';
+      } else if (score >= 4) {
+        message = '还行，多看看世界地图！🌍';
+      } else {
+        message = '加油！世界很大，多看看～ 🗺️';
+      }
+      
+      container.innerHTML = `
+        <div class="result">
+          <h2>答题完成！</h2>
+          <div class="score">${score} / 10</div>
+          <div class="message">${message}</div>
+          <button class="restart-btn" onclick="restart()">再玩一次</button>
+        </div>
+      `;
+    }
+
+    function restart() {
+      currentIndex = 0;
+      score = 0;
+      generateQuestions();
+      
+      const container = document.getElementById('game');
+      container.innerHTML = `
+        <h1>🌍 国旗知识问答</h1>
+        <div class="progress">第 <span id="current">1</span> / 10 题</div>
+        <div class="flag-display">
+          <img id="flag" class="flag-img" src="" alt="国旗">
+        </div>
+        <div class="options" id="options"></div>
+      `;
+      renderQuestion();
+    }
+
+    // 初始化
+    generateQuestions();
+    renderQuestion();
+  </script>
+</body>
+</html>
